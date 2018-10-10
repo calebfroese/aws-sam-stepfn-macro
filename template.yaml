@@ -4,26 +4,6 @@ Description: >
   Cleanly generate step function string JSON in YML CloudFormation templates
 
 Resources:
-  TransformExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: [lambda.amazonaws.com]
-            Action: ['sts:AssumeRole']
-      Path: /
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action: ['logs:*']
-                Resource: 'arn:aws:logs:*:*:*'
-
   TransformFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -31,6 +11,7 @@ Resources:
       CodeUri: dist
       Handler: index.transform
       Runtime: nodejs8.10
+      Role: !GetAtt TransformLambdaRole.Arn
 
   TransformFunctionPermissions:
     Type: AWS::Lambda::Permission
@@ -41,7 +22,7 @@ Resources:
   Transform:
     Type: AWS::CloudFormation::Transform
     Properties:
-      Name: !Sub '${AWS::AccountId}::String'
+      Name: !Sub '${AWS::AccountId}::ParseDefinitionString'
       Description: Provides step function string processing function
       RoutingTable:
         '*': 0_1
@@ -58,4 +39,28 @@ Resources:
             Principal:
               AWS: !Sub '${AWS::AccountId}'
             Action: 'cloudformation:CreateChangeSet'
-            Resource: !Sub 'arn:*:cloudformation:${AWS::Region}:${AWS::AccountId}:transform/String'
+            Resource: !Sub 'arn:*:cloudformation:${AWS::Region}:${AWS::AccountId}:transform/ParseDefinitionString'
+
+  TransformLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: '/'
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'logs:*'
+                Resource:
+                  - '*'
