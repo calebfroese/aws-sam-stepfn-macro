@@ -4,14 +4,34 @@ Description: >
   Cleanly generate step function string JSON in YML CloudFormation templates
 
 Resources:
+  TransformExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ['logs:*']
+                Resource: 'arn:aws:logs:*:*:*'
+
   TransformFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Tracing: Active
-      CodeUri: dist
+      Timeout: 10
+      CodeUri: dist/
       Handler: index.transform
       Runtime: nodejs8.10
-      Role: !GetAtt TransformLambdaRole.Arn
+      Role: !GetAtt TransformExecutionRole.Arn
 
   TransformFunctionPermissions:
     Type: AWS::Lambda::Permission
@@ -23,12 +43,12 @@ Resources:
     Type: AWS::CloudFormation::Transform
     Properties:
       Name: !Sub '${AWS::AccountId}::ParseDefinitionString'
-      Description: Provides step function string processing function
+      Description: Provides various string processing functions
       RoutingTable:
         '*': 0_1
       Versions:
         - VersionName: 0_1
-          Description: Version 0_1 of the step function transform
+          Description: Version 0_1 of the ParseDefinitionString transform
           FunctionName: !GetAtt TransformFunction.Arn
       ExecutionPolicy:
         Version: 2012-10-17
@@ -40,27 +60,3 @@ Resources:
               AWS: !Sub '${AWS::AccountId}'
             Action: 'cloudformation:CreateChangeSet'
             Resource: !Sub 'arn:*:cloudformation:${AWS::Region}:${AWS::AccountId}:transform/ParseDefinitionString'
-
-  TransformLambdaRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      Path: '/'
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: 'Allow'
-                Action:
-                  - 'logs:*'
-                Resource:
-                  - '*'

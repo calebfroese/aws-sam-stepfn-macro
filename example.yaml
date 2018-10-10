@@ -1,32 +1,44 @@
+Transform: ParseDefinitionString
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
-Description: Test the Step Function definition string transform
-
+Description: tests String macro functions
+Parameters:
+  InputString:
+    Default: 'This is a test input string'
+    Type: String
 Resources:
-  SomeExampleRole:
-    Type: AWS::IAM::Role
+  ExampleStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub '${AWS::StackName}-Macro-Example'
+      RoleArn: !GetAtt ExampleStateMachineRole.Arn
+      Definition:
+        Comment: 'PIRSA Prawn Report Report State Machine'
+        StartAt: 'Test'
+        States:
+          - Test:
+              Type: 'Pass'
+              Result: 'Done'
+              End: true
+
+  ExampleStateMachineRole:
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Effect: Allow
+          - Effect: 'Allow'
             Principal:
               Service:
-                - lambda.amazonaws.com
+                - !Sub 'states.${AWS::Region}.amazonaws.com'
             Action:
-              - sts:AssumeRole
+              - 'sts:AssumeRole'
       Path: '/'
       Policies:
-        - PolicyName: root
+        - PolicyName: 'lambda'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: 'Allow'
                 Action:
-                  - 'logs:*'
-                Resource:
-                  'Fn::ParseDefinitionString':
-                  - Name: 'String'
-                    Parameters:
-                      InputString: !Ref InputString
-                      Operation: Upper
+                  - 'lambda:InvokeFunction'
+                Resource: '*'
