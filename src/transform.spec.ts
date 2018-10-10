@@ -61,8 +61,10 @@ describe('Transform', () => {
             ExampleStateMachine: {
               Type: 'AWS::StepFunctions::StateMachine',
               Properties: {
-                DefinitionString:
-                  '{"Comment":"PIRSA Prawn Report Report State Machine","StartAt":"Test","States":[{"Test":{"Type":"Pass","Result":"Done","End":true}}]}',
+                DefinitionString: {
+                  'Fn::Sub':
+                    '{"Comment":"PIRSA Prawn Report Report State Machine","StartAt":"Test","States":[{"Test":{"Type":"Pass","Result":"Done","End":true}}]}',
+                },
               },
             },
             ExampleStateMachineRole: {

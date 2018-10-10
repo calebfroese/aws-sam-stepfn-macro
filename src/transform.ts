@@ -11,11 +11,9 @@ export function transform(event: any, ctx: any, callback: Function) {
 
   // Parse each of the definitions
   StateMachines.forEach(stateMachine => {
-    event.fragment.Resources[
-      stateMachine.name
-    ].Properties.DefinitionString = JSON.stringify(
-      stateMachine.resource.Properties.Definition
-    );
+    event.fragment.Resources[stateMachine.name].Properties.DefinitionString = {
+      'Fn::Sub': JSON.stringify(stateMachine.resource.Properties.Definition),
+    };
     delete event.fragment.Resources[stateMachine.name].Properties.Definition;
   });
 
