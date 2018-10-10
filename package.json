@@ -1,0 +1,42 @@
+{
+  "name": "aws-sam-stepfn-macro",
+  "version": "1.0.0",
+  "description": "Cleanly generate step function string JSON in YML CloudFormation templates",
+  "scripts": {
+    "prepackage": "npm run build:prod",
+    "package": "sam package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket aws-sam-stepfn-macro",
+    "predeploy": "npm run package",
+    "deploy": "sam deploy --template-file packaged.yaml --stack-name bloodrush --capabilities CAPABILITY_IAM",
+    "prebuild:prod": "rm -rf ./dist/prod",
+    "build:prod": "./node_modules/.bin/webpack",
+    "prebuild:test": "rm -rf ./dist",
+    "build:dev": "tsc",
+    "pretest": "npm run build:dev",
+    "test": "mocha --recursive \"dist/**/**.{spec,e2e}.js\"",
+    "watch:test": "nodemon -e ts,json --ignore dist/ --exec \"npm run test || true\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calebfroese/aws-sam-stepfn-macro.git"
+  },
+  "author": "Caleb Froese <caleb.froese@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/calebfroese/aws-sam-stepfn-macro/issues"
+  },
+  "homepage": "https://github.com/calebfroese/aws-sam-stepfn-macro#readme",
+  "devDependencies": {
+    "@types/chai": "^4.1.6",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.11.3",
+    "@types/sinon": "^5.0.2",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "nodemon": "^1.18.4",
+    "sinon": "^6.3.4",
+    "ts-loader": "^5.2.1",
+    "typescript": "^3.1.1",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2"
+  }
+}
